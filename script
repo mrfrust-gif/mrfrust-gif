@@ -1,0 +1,271 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Galaxy Hub | Free Version 1.10",
+   LoadingTitle = "Loading Free Version 1.10",
+   LoadingSubtitle = "by fresty.ccp_",
+   Theme = "Default",
+
+   KeySystem = true,
+   KeySettings = {
+      Title = "Galaxy Key Free",
+      Subtitle = "Key System",
+      Note = "Join discord to get key.",
+      FileName = "Key",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {"galaxy_key_IW281829Q"}
+   }
+})
+
+-- ========== Reach Tab ==========
+local ReachTab = Window:CreateTab("Reach", 4483362458)
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local HitboxPart = character:FindFirstChild("Right Leg") or character:FindFirstChild("RightLowerLeg")
+
+if HitboxPart then
+   ReachTab:CreateSlider({
+      Name = "Reach Hitbox",
+      Range = {0, 30},
+      Increment = 1,
+      Suffix = "Studs",
+      CurrentValue = 10,
+      Flag = "ReachSlider",
+      Callback = function(Value)
+         HitboxPart.Size = Vector3.new(Value, HitboxPart.Size.Y, Value)
+         HitboxPart.CanCollide = false
+         HitboxPart.Massless = true
+         HitboxPart.Transparency = 0.7
+      end,
+   })
+else
+   ReachTab:CreateLabel("Right Leg or RightLowerLeg not found!")
+end
+
+-- ========== Infinite Stamina Tab ==========
+local StaminaTab = Window:CreateTab("Inf Stamina", 4483345998)
+
+StaminaTab:CreateButton({
+   Name = "Infinite Stamina",
+   Callback = function()
+      local player = game.Players.LocalPlayer
+      local character = player.Character or player.CharacterAdded:Wait()
+      local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+      if humanoid then
+         coroutine.wrap(function()
+            while true do
+               humanoid.WalkSpeed = 50
+               wait(0.1)
+            end
+         end)()
+      end
+   end,
+})
+
+-- ========== Ball Telekinesis Tab ==========
+local BallTab = Window:CreateTab("Ball Telekinesis", 4483362458)
+
+local RunService = game:GetService("RunService")
+local mouse = player:GetMouse()
+
+local success, ball = pcall(function()
+   return workspace:WaitForChild("Ball", 5)
+end)
+
+local telekinesisActive = false
+local followDistance = 10
+
+if success and ball then
+   BallTab:CreateToggle({
+      Name = "Ball Telekinesis",
+      CurrentValue = false,
+      Flag = "BallTelekinesis",
+      Callback = function(Value)
+         telekinesisActive = Value
+      end,
+   })
+
+   RunService.RenderStepped:Connect(function()
+      if telekinesisActive and ball then
+         local targetPos = mouse.Hit.Position + Vector3.new(0, followDistance, 0)
+         ball.Position = ball.Position:Lerp(targetPos, 0.2)
+      end
+   end)
+else
+   BallTab:CreateLabel("Ball not found!")
+end
+
+-- ========== Movement Tab ==========
+local MovementTab = Window:CreateTab("Movement", 4483345998)
+
+-- WalkSpeed
+MovementTab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {16, 100},
+   Increment = 1,
+   CurrentValue = 16,
+   Callback = function(val)
+      local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+      if hum then hum.WalkSpeed = val end
+   end,
+})
+
+-- Jump Power
+MovementTab:CreateSlider({
+   Name = "Jump Power",
+   Range = {50, 200},
+   Increment = 5,
+   CurrentValue = 50,
+   Callback = function(val)
+      local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+      if hum then hum.JumpPower = val end
+   end,
+})
+
+-- Infinite Jump
+local infJump = false
+MovementTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Callback = function(state)
+      infJump = state
+   end,
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+   if infJump then
+      local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+      if hum then hum:ChangeState("Jumping") end
+   end
+end)
+
+-- Noclip
+local noclip = false
+MovementTab:CreateToggle({
+   Name = "Noclip",
+   CurrentValue = false,
+   Callback = function(state)
+      noclip = state
+   end,
+})
+
+game:GetService("RunService").Stepped:Connect(function()
+   if noclip then
+      for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+         if part:IsA("BasePart") and part.CanCollide then
+            part.CanCollide = false
+         end
+      end
+   end
+end)
+
+-- ========== Visuals Tab ==========
+local VisualTab = Window:CreateTab("Visuals", 4483362458)
+
+-- FOV Changer
+VisualTab:CreateSlider({
+   Name = "Field of View",
+   Range = {70, 120},
+   Increment = 1,
+   CurrentValue = 70,
+   Callback = function(val)
+      game.Workspace.CurrentCamera.FieldOfView = val
+   end,
+})
+
+-- Fullbright
+VisualTab:CreateButton({
+   Name = "Fullbright",
+   Callback = function()
+      game.Lighting.Brightness = 2
+      game.Lighting.ClockTime = 12
+      game.Lighting.FogEnd = 100000
+      game.Lighting.GlobalShadows = false
+   end,
+})
+
+-- Rainbow Character
+VisualTab:CreateToggle({
+   Name = "Rainbow Character",
+   CurrentValue = false,
+   Callback = function(state)
+      if not state then return end
+      coroutine.wrap(function()
+         while state do
+            for _, part in ipairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+               if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                  part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+               end
+            end
+            wait(0.1)
+         end
+      end)()
+   end,
+})
+
+-- Simple ESP (Box + Name)
+VisualTab:CreateButton({
+   Name = "ESP Players",
+   Callback = function()
+      for _, v in pairs(game.Players:GetPlayers()) do
+         if v ~= game.Players.LocalPlayer and v.Character then
+            local box = Instance.new("BillboardGui", v.Character:FindFirstChild("Head"))
+            box.Size = UDim2.new(0, 100, 0, 40)
+            box.AlwaysOnTop = true
+
+            local name = Instance.new("TextLabel", box)
+            name.Size = UDim2.new(1, 0, 1, 0)
+            name.Text = v.Name
+            name.BackgroundTransparency = 1
+            name.TextColor3 = Color3.new(1, 1, 1)
+         end
+      end
+   end,
+})
+
+-- ========== Utility Tab ==========
+local UtilityTab = Window:CreateTab("Utility", 4483362458)
+
+-- Click TP
+UtilityTab:CreateToggle({
+   Name = "Click Teleport",
+   CurrentValue = false,
+   Callback = function(state)
+      local mouse = game.Players.LocalPlayer:GetMouse()
+      mouse.Button1Down:Connect(function()
+         if state then
+            local pos = mouse.Hit.Position
+            game.Players.LocalPlayer.Character:MoveTo(pos)
+         end
+      end)
+   end,
+})
+
+-- Anti-AFK
+UtilityTab:CreateButton({
+   Name = "Anti-AFK",
+   Callback = function()
+      local vu = game:GetService("VirtualUser")
+      game:GetService("Players").LocalPlayer.Idled:Connect(function()
+         vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+         wait(1)
+         vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+      end)
+   end,
+})
+
+-- Delete Doors
+UtilityTab:CreateButton({
+   Name = "Delete All Doors",
+   Callback = function()
+      for _, v in pairs(workspace:GetDescendants()) do
+         if v:IsA("BasePart") and v.Name:lower():find("door") then
+            v:Destroy()
+         end
+      end
+   end,
+})
